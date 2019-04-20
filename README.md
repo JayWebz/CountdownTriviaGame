@@ -1,4 +1,4 @@
-# Trivia-Game
+# Countdown Trivia game
 A responsive 3-question timed trivia game that runs like a Buzztime trivia game. Powered by Javascript.
 
 Question data sourced from https://opentdb.com/api_config.php.<br/>
@@ -26,6 +26,9 @@ Sample Response:
 ```
 
 Known issues and future enhancements:
-*when app is running, app must remain in active window. If referred back to, game will break due to DOM timing misses.
-*Scoring needs should be visible at the end of each question.
-*Space out clue delivery a bit more.
+
+-When app is running, app must remain in active window. If referred back to, game will break due to DOM timing misses.
+
+-Scoring needs should be visible at the end of each question.
+
+-Space out clue delivery a bit more.
