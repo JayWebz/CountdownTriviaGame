@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Trivia Game</title>
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<link href="https://fonts.googleapis.com/css?family=Russo+One" rel="stylesheet">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+	<div class="game">
+		<div class="game-wrapper">
+			<div class="question-screen">
+				<div class="banner">
+					<div class="banner__logo">?</div>
+					<div class="banner__question">Question 1 of 3</div>
+				</div>
+				<div class="trivia">
+					<div class="trivia__options-disable"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script>
+	// SCORE CONTROLLER
+	var scoreController = (function() {
+		// Define Score object
+		var Score = function(score, questionNo, userAnswer) {
+			this.score = score;
+			this.questionNo = questionNo;
+			this.userAnswer = userAnswer;
+		};
+
+		// Define data manager
+		var data = {
+			allScores: [],
+			uniqueScores: [],
+			totalScore: 0
+		};
+
+		return {
+			logScore: function(scr, qNo, userAnswer) {
+				// log score into array with all other scores
+				var newScore;
+				newScore = new Score(scr, qNo, userAnswer);
+				data.allScores.push(newScore);
+				return newScore;
+			},
+
+			tallyScore: function(qAnswers) {
+				// Sort array to grab last input as final answer
+				data.allScores.reverse();
+
+				// grab final answer for question 1
+				for (var i=0; i < data.allScores.length; i++) {
+					if (data.allScores[i].questionNo == 1) {
+						data.uniqueScores.push(data.allScores[i]);
+						break;
+					}
+				}
+
+				// grab final answer for question 2
+				for (var i=0; i < data.allScores.length; i++) {					
+					if (data.allScores[i].questionNo == 2) {
+						data.uniqueScores.push(data.allScores[i]);
+						break;
+					}
+				}
+
+				// grab final answer for question 3
+				for (var i=0; i < data.allScores.length; i++) {
+					if (data.allScores[i].questionNo == 3) {
+						data.uniqueScores.push(data.allScores[i]);
+						break;
+					}
+				}
+
+				// Check if user final answers match with correct answers
+				for (var i=0; i < qAnswers.length; i++) {
+					if (i + 1 == data.uniqueScores[i].questionNo) {						
+						if (qAnswers[i] == data.uniqueScores[i].userAnswer) {							
+							// Add value to user total score
+							data.totalScore += data.uniqueScores[i].score;
+						}
+					}			
+				}
+				
+				return { userScore: data.totalScore };
+			},
+
+			generateAIScores: function() {
+				// Generate scores for two additional players to populate
+				var friendScoreVal, guyScoreVal;
+				friendScoreVal = Math.round(1500 + Math.random() * 500);
+				guyScoreVal = Math.round(2000 + Math.random() * 600);
+				return { friendScore: friendScoreVal, guyScore: guyScoreVal };
+			},
+
+			resetScores: function() {
+				data.uniqueScores = [];
+				data.allScores = [];
+				data.totalScore = 0;
+			}
+		}
+	})();
+
+	// UI CONTROLLER
+	var UIController = (function() {
+		var questions = {
+			q1: {},
+			q2: {},
+			q3: {}
+		};
+
+		var getQuestions = async function() {
+			// Call API for question data
+			await fetch('https://opentdb.com/api.php?amount=3&category=9&type=multiple')
+			.then(result => {
+				return result.json();
+			})
+			.then(data => {
+				// Set data to variable to be passed for initialize question data structure
+				let questionsRawData = data.results;
+
+				// Populate data in questions nested objects
+				Object.keys(questions).forEach(function(question, index) {
+
+					// Collect all answers in single array
+					let answers = [];
+					answers.push(questionsRawData[index].incorrect_answers[0], questionsRawData[index].incorrect_answers[1], questionsRawData[index].incorrect_answers[2], questionsRawData[index].correct_answer);
+
+					// Shuffle answers
+					var currentIndex = answers.length, temporaryValue, randomIndex;
+					while (0 !== currentIndex) {
+					    // Pick a remaining element
+					    randomIndex = Math.floor(Math.random() * currentIndex);
+					    currentIndex -= 1;
+
+					    // And swap it with the current element
+					    temporaryValue = answers[currentIndex];
+					    answers[currentIndex] = answers[randomIndex];
+					    answers[randomIndex] = temporaryValue;
+					}
+					
+					// Set answer data in questions object
+					questions["q" + (index + 1)].answer1 = answers[0];
+					questions["q" + (index + 1)].answer2 = answers[1];
+					questions["q" + (index + 1)].answer3 = answers[2];
+					questions["q" + (index + 1)].answer4 = answers[3];
+
+					// Set Question, correctAnswerNum, and Category in questions object
+					questions["q" + (index + 1)].question = questionsRawData[index].question;
+					questions["q" + (index + 1)].correctAnswerNum = answers.indexOf(questionsRawData[index].correct_answer) + 1;
+					questions["q" + (index + 1)].category = questionsRawData[index].difficulty + " " + questionsRawData[index].category;
+
+					// Set clues in questions object
+					questions["q" + (index + 1)].clue1 = "It's not answer #" + (answers.indexOf(questionsRawData[index].incorrect_answers[0]) + 1);
+					questions["q" + (index + 1)].clue2 = "And not answer #" + (answers.indexOf(questionsRawData[index].incorrect_answers[1]) + 1);
+					questions["q" + (index + 1)].clue3 = "It's answer #" + (answers.indexOf(questionsRawData[index].correct_answer) + 1);
+				});
+			})
+			.catch(error => {
+				console.log(error);
+			});
+		};
+		
+		// relevant class name strings
+		var DOMstrings = {
+			beginDemo: ".begin",
+			answerOption1: '.trivia__options-option--1',
+			answerOption2: '.trivia__options-option--2',
+			answerOption3: '.trivia__options-option--3',
+			answerOption4: '.trivia__options-option--4',
+			answerOption1id: 'trivia__options-option--1',
+			answerOption2id: 'trivia__options-option--2',
+			answerOption3id: 'trivia__options-option--3',
+			answerOption4id: 'trivia__options-option--4',
+			timerContainer: '.timer',
+			timer: '.timer__counter',
+			timerValue: '.timer__counter-text',
+			optionClassPreface: ".trivia__options-option--",
+			optionClassHighlighted: "trivia__options-option--highlighted",
+			triviaHeader: '.trivia__header',
+			triviaQuestion: ".trivia__question",
+			triviaClues: ".trivia__clues",
+			triviaOptions: ".trivia__options",
+			triviaOptionsDisable: ".trivia__options-disable",
+			fadeOutAnimationBlock: "fade-out-animation--block",
+			fadeOutAnimationFlex: "fade-out-animation--flex",
+			banner: ".banner",
+			bannerQuestionNo: ".banner__question",
+			correctAnswer: "trivia__options-option--correct",
+			answerImage: ".trivia__answer-text",
+			questionScreen: ".question-screen",
+			triviaAnswerContainer: ".trivia__answer-header",
+			triviaContainer: ".trivia",
+			questionScreen: ".question-screen",
+			gameWrapper: ".game-wrapper",
+			leaderboardScreen: ".leaderboard-screen"
+		};
+
+		var countdownTimer = function() {
+			var delayTimer, scoreValueInterval, initialState, countdownTimer, timerValue;
+			delayTimer = 0;
+			scoreValueInterval = 30;
+			initialState = 1000;
+			timerDisplay = initialState;
+
+			countdownTimer = setTimeout(function() {
+				function countdown() {
+					timerDisplay--;
+					if (timerDisplay-- > 0) {
+						document.querySelector(DOMstrings.timerValue).innerHTML = timerDisplay;
+						setTimeout(countdown, scoreValueInterval);
+					}
+				}
+				countdown();
+			}, delayTimer);
+		};
+
+		var queueClues = function(questionNo) {
+			var queueClue1Time, queueClue2Time, queueClue3Time, checkTimeInterval, stopCheckingTime, questionNum;
+			queueClue1Time = 700;
+			queueClue2Time = 500;
+			queueClue3Time = 300;
+			checkTimeInterval = 30;
+			stopCheckingTime = 0;
+
+			(function monitorScore() {
+				// First clue populates at 700
+				if (document.querySelector(DOMstrings.timerValue).innerHTML == queueClue1Time) {
+					// Remove question and populate clue container + first clue
+					document.querySelector(DOMstrings.triviaQuestion).style.display = 'none';
+					htmlClue1 = '<div class="trivia__clues"><p class="trivia__clues-title">Clues:</p><p class="trivia__clues-1">%clue1%</p></div>';
+					newHtmlClue1 = htmlClue1.replace('%clue1%', questions[questionNo].clue1);
+					document.querySelector(DOMstrings.triviaHeader).insertAdjacentHTML('beforeend', newHtmlClue1);
+				} 
+
+				// Second clue populates at 500
+				if (document.querySelector(DOMstrings.timerValue).innerHTML == queueClue2Time) {
+					// populate second clue in clue container
+					htmlClue2 = '<p class="trivia__clues-2">%clue2%</p>';
+					newHtmlClue2 = htmlClue2.replace('%clue2%', questions[questionNo].clue2);
+					document.querySelector(DOMstrings.triviaClues).insertAdjacentHTML('beforeend', newHtmlClue2);
+				
+				} 
+
+				// Final clue populate at 300
+				if (document.querySelector(DOMstrings.timerValue).innerHTML == queueClue3Time) {
+					// populate final clue in clue container
+					htmlClue3 = '<p class="trivia__clues-3">%clue3%</p>';
+					newHtmlClue3 = htmlClue3.replace('%clue3%', questions[questionNo].clue3);
+					document.querySelector(DOMstrings.triviaClues).insertAdjacentHTML('beforeend', newHtmlClue3);
+				} 
+				
+				// Keep checking timer value to determine when to queue clues
+				checkForScore = setTimeout(monitorScore, checkTimeInterval);
+				
+				if (document.querySelector(DOMstrings.timerValue).innerHTML == stopCheckingTime) {
+					// Stop allowing user to change answer
+					document.querySelector(DOMstrings.triviaOptionsDisable).style.display = "block";
+					// Stop checking timer value when it hits 0
+					clearInterval(checkForScore);
+				}
+			})();
+		};
+
+		var queueCorrectAnswer = function(questionNo) {
+			// Commence animation sequence when timer hits 0
+			// Keep checking timer value to determine when to queue answer sequence
+			
+			(function monitorScore() {
+				if (document.querySelector(DOMstrings.timerValue).innerHTML == 0) {
+					timeBetweenQuestionAndFunFact = 1200;
+					funFactDuration = 10000;
+					
+					// Remove items not included in funfact
+					correctAnswer = questions[questionNo].correctAnswerNum;
+					correctAnswerClass = DOMstrings.optionClassPreface + correctAnswer;
+					document.querySelector(DOMstrings.triviaClues).classList.add(DOMstrings.fadeOutAnimationBlock);
+					document.querySelector(DOMstrings.timerContainer).classList.add(DOMstrings.fadeOutAnimationFlex);
+					correctAnswerClassHTML = document.querySelector(correctAnswerClass);
+					document.querySelector(DOMstrings.triviaOptions).classList.add(DOMstrings.fadeOutAnimationBlock);
+					
+					// Display correct answer under banner and fun fact
+					setTimeout(function() {
+						
+						// Remove hidden question container
+						triviaQuestionContainer = document.querySelector(DOMstrings.triviaContainer);
+						triviaQuestionContainer.parentNode.removeChild(triviaQuestionContainer);
+
+						// Insert image
+						html = '<div class="trivia__answer-header"><p class="trivia__answer-text">Answer</p></div>';
+						document.querySelector(DOMstrings.banner).insertAdjacentHTML('afterend', html);
+
+						// Insert answer
+						if (correctAnswerClassHTML.classList.contains(DOMstrings.optionClassHighlighted)) {
+							correctAnswerClassHTML.classList.remove(DOMstrings.optionClassHighlighted);
+						}
+						correctAnswerClassHTML.classList.add(DOMstrings.correctAnswer);
+						document.querySelector(DOMstrings.answerImage).insertAdjacentElement('afterend', correctAnswerClassHTML);
+
+						setTimeout(function() {
+							
+							// Clear screen and hidden html elements for question
+							triviaAnswerContainer = document.querySelector(DOMstrings.triviaAnswerContainer);
+							triviaAnswerContainer.parentNode.removeChild(triviaAnswerContainer);
+						}, funFactDuration)
+
+					}, timeBetweenQuestionAndFunFact);
+				}
+
+				// Monitor timer periodically
+				checkForScore = setTimeout(monitorScore, 2000);
+
+				if (document.querySelector(DOMstrings.timerValue).innerHTML == 0) {
+					
+					// Stop checking timer value when it hits 0
+					clearInterval(checkForScore);
+				}
+			})();
+		}
+
+		return {
+			populateQuestion: function(questionNo) {
+				var html, newHtml;
+
+				setTimeout(function() {
+					// Populate question
+					html = '<div class="trivia__header fade-in-animation"><p class="trivia__question">%question%</p></div>';
+					newHtml = html.replace('%question%', questions[questionNo].question);
+					document.querySelector(DOMstrings.triviaContainer).insertAdjacentHTML('afterbegin', newHtml);
+
+					// Populate answer options
+					html = '<div class="trivia__options fade-in-animation"><div id="trivia__options-option--1" class="trivia__options-option trivia__options-option--1"><div class="trivia__options-number"><span class="trivia__options-number-text">1</span></div><span class="trivia__options-answer">%answerOption1%</span></div><div id="trivia__options-option--2" class="trivia__options-option trivia__options-option--2"><div class="trivia__options-number"><span class="trivia__options-number-text">2</span></div><span class="trivia__options-answer">%answerOption2%</span></div><div id="trivia__options-option--3" class="trivia__options-option trivia__options-option--3"><div class="trivia__options-number"><span class="trivia__options-number-text">3</span></div><span class="trivia__options-answer">%answerOption3%</span></div><div id="trivia__options-option--4" class="trivia__options-option trivia__options-option--4"><div class="trivia__options-number"><span class="trivia__options-number-text">4</span></div><span class="trivia__options-answer">%answerOption4%</span></div></div>';
+					newHtml = html.replace('%answerOption1%', questions[questionNo].answer1).replace('%answerOption2%', questions[questionNo].answer2).replace('%answerOption3%', questions[questionNo].answer3).replace('%answerOption4%', questions[questionNo].answer4);
+					setTimeout(function() {
+						document.querySelector(DOMstrings.triviaContainer).insertAdjacentHTML('beforeend', newHtml);
+						html = '<div class="timer"><div class="timer__left"></div></div>';
+						document.querySelector(DOMstrings.triviaContainer).insertAdjacentHTML('beforeend', html);
+					}, 2500);
+				}, 1000);
+			},
+
+			getPlayerAnswer: function() {
+				// Firefox does not register event.path so variable declaration necessary to capture each case
+				var path = event.path || (event.composedPath && event.composedPath());
+				if (path) {
+					return {
+						questionNo: document.querySelector(DOMstrings.bannerQuestionNo).innerHTML.slice(9, 10),
+						selectedAnswerNum: path[0].className.substr(-1),
+						timerWhenAnswered: parseInt(document.querySelector(DOMstrings.timerValue).innerHTML)
+					}
+				}
+			},
+
+			getTimer: function() {
+				// Create html string with placeholder text
+				var html, newHtml, element, defaultTimerValue, initiateTimerDelay;
+
+				element = DOMstrings.timerContainer;
+				html = '<div class="timer__counter"><span class="timer__counter-text">%timer%</span></div>';
+				defaultTimerValue = 1000;
+				initiateTimerDelay = 4000;
+
+				// Replace placeholder text with real-time timer value
+				newHtml = html.replace('%timer%', defaultTimerValue);
+				setTimeout(function() {
+					newHtml = html.replace('%timer%', countdownTimer());
+				}, initiateTimerDelay);
+
+				// Insert html into DOM
+				document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
+			},
+
+			provideClues: function(questionNo) {
+				
+				// Track timer value to determine when clue should display
+				queueClues(questionNo);
+			},
+
+			highlightSelectedAnswer: function(playerAnswer) {
+				var answerSelected, answerOptions, priorAnswerSelected;
+
+				answerSelected = DOMstrings.optionClassPreface + playerAnswer.selectedAnswerNum;
+
+				// Remove highlight class from options if they have it
+				for (var i = 1; i < 5; i++) {
+					answerOptions = DOMstrings.optionClassPreface + [i];
+					if (document.querySelector(answerOptions).classList.contains(DOMstrings.optionClassHighlighted)) {
+						document.querySelector(answerOptions).classList.remove(DOMstrings.optionClassHighlighted);
+					}	
+				}
+
+				// Add class for selected answer
+				document.querySelector(answerSelected).classList.add(DOMstrings.optionClassHighlighted);
+				
+				// Reset identifier classname to end of class list
+				highlightedClass = document.querySelector('.' + DOMstrings.optionClassHighlighted);
+				highlightedClass.classList.remove(answerSelected.substring(1));
+				highlightedClass.classList.add(answerSelected.substring(1));
+			},
+
+			featureCorrectAnswer: function(questionNo) {
+				
+				// When timer hits 0, queue answer revealed with fun fact
+				queueCorrectAnswer(questionNo);
+			},
+
+			getDOMstrings: function() {
+				return DOMstrings;
+			},
+
+			getQuestions: function() {
+				return getQuestions();
+			},
+
+			getAnswers: function() {
+				return questions;
+			}
+		}
+	})();
+
+	// GLOBAL APP CONTROLLER
+	var controller = (function(scoreCtrl, UICtrl) {
+		var ctrlGameFlow = function() {
+			
+			// define number of questions expected
+			var q1, q2, q3, questionFlowDuration;
+			q1 = 'q1';
+			q2 = 'q2';
+			q3 = 'q3';
+			questionFlowDuration = 38000;
+
+			// Initialize Question Data
+			UICtrl.getQuestions();
+
+			ctrlQuestionFlow(q1);
+			
+			//trigger next question once prior question flow is finished
+			setTimeout(function() {
+				var DOM, html, element, question;
+				DOM = UICtrl.getDOMstrings();
+				
+				// Insert trivia container for next question to populate
+				html = '<div class="trivia"><div class="trivia__options-disable"></div></div>';
+				element = DOM.banner;
+				
+				// Update question 
+				document.querySelector(DOM.bannerQuestionNo).innerHTML = 'Question 2 of 3';
+				document.querySelector(element).insertAdjacentHTML('afterend', html);				
+				ctrlQuestionFlow(q2);
+				
+				//trigger next question once prior question flow is finished
+				setTimeout(function() {
+					var DOM, html, element, question;
+					DOM = UICtrl.getDOMstrings();
+					
+					// Insert trivia container for next question to populate
+					html = '<div class="trivia"><div class="trivia__options-disable"></div></div>';
+					element = DOM.banner;
+					
+					// Update question 
+					document.querySelector(DOM.bannerQuestionNo).innerHTML = 'Question 3 of 3';
+					document.querySelector(element).insertAdjacentHTML('afterend', html);
+					ctrlQuestionFlow(q3);
+					
+					// Trigger leaderboard at end of series
+					setTimeout(function() {
+						
+						// Remove question screen template
+						var DOM, questionScreenHtml, questions, aiScores, allScores, html;
+						DOM = UICtrl.getDOMstrings();
+						questionScreenHtml = document.querySelector(DOM.questionScreen);
+						questionScreenHtml.parentNode.removeChild(questionScreenHtml);
+						
+						// Tally up scores
+						questions = UICtrl.getAnswers();
+						console.log(questions.q1);
+						console.log(questions.q1.correctAnswerNum);
+						qAnswers = [questions.q1.correctAnswerNum, questions.q2.correctAnswerNum, questions.q3.correctAnswerNum];
+						var userScore = scoreCtrl.tallyScore(qAnswers);
+
+						// Generate non-user scores
+						aiScores = scoreCtrl.generateAIScores();
+
+						// Rank scores
+						allScores = Object.assign(aiScores, userScore);
+						rankUser = Object.keys(allScores).sort(function(a,b){return allScores[a]-allScores[b]});
+						rankScore = rankUser.map(key => allScores[key]);
+
+						// Display leaderboard
+						html = '<div class="leaderboard-screen fade-in-animation"><div class="banner__logo">?</div><span class="leaderboard__title">Leaderboard</span><table class="leaderboard__table" border="0" cellspacing="0" cellpadding="0"><tbody><tr><th>Rank</th><th>Player</th><th>score</th></tr><tr><td>1</td><td>%name1%</td><td>%score1%</td></tr><tr><td>2</td><td>%name2%</td><td>%score2%</td></tr><tr><td>3</td><td>%name3%</td><td>%score3%</td></tr></tbody></table></div>';
+						newHtml = html.replace('%name1%', rankUser[2]).replace('%name2%', rankUser[1]).replace('%name3%', rankUser[0]).replace('%score1%', rankScore[2]).replace('%score2%', rankScore[1]).replace('%score3%', rankScore[0]).replace('guyScore', 'That guy').replace('friendScore', 'Your friend').replace('userScore', 'your name');
+						document.querySelector(DOM.gameWrapper).insertAdjacentHTML('beforeend', newHtml);
+
+						// Display restart button
+						button = '<button class="restart fade-in-animation">Click to restart game</button></div>';
+						document.querySelector(".leaderboard__table").insertAdjacentHTML('afterend', button);
+						
+						// When clicked, reset scores and initiate game again
+						document.querySelector(".restart").addEventListener('click', function() {
+							var DOM, leaderboardScreenHtml, html;
+							scoreCtrl.resetScores();
+							DOM = UICtrl.getDOMstrings();
+							leaderboardScreenHtml = document.querySelector(DOM.leaderboardScreen);
+							leaderboardScreenHtml.parentNode.removeChild(leaderboardScreenHtml);
+							html = '<div class="question-screen"><div class="banner"><div class="banner__logo">?</div><div class="banner__question">Question 1 of 3</div></div><div class="trivia"><div class="trivia__options-disable"></div></div></div>';
+							document.querySelector(DOM.gameWrapper).insertAdjacentHTML('beforeend', html);
+							ctrlGameFlow();
+						});
+					}, questionFlowDuration);
+				}, questionFlowDuration);
+			}, questionFlowDuration);
+		};
+
+		var ctrlQuestionFlow = function(questionNo) {
+			
+			// Display question Sequence with options
+			UICtrl.populateQuestion(questionNo);
+			
+			// Display timer sequence once question sequence is complete
+			setTimeout(function() {
+				
+				// Allow DOM Strings defined in UIController to be accessible in controller
+				var DOM = UICtrl.getDOMstrings();
+
+				// Set default score in event user does not respond
+				scoreCtrl.logScore (0, questionNo.substr(-1), "0");
+				
+				// Populate question and unlock answer options
+				UICtrl.getTimer();
+				document.getElementById(DOM.answerOption1id).addEventListener('click', ctrlLogScore);
+				document.getElementById(DOM.answerOption2id).addEventListener('click', ctrlLogScore);
+				document.getElementById(DOM.answerOption3id).addEventListener('click', ctrlLogScore);
+				document.getElementById(DOM.answerOption4id).addEventListener('click', ctrlLogScore);
+
+				// Populate clues as timer diminishes
+				UICtrl.provideClues(questionNo);
+
+				// Then feature correct answer
+				UICtrl.featureCorrectAnswer(questionNo);
+			}, 4000);
+		};
+		
+		// Capture input/score when player selects answer option
+		var ctrlLogScore = function() {		
+			var playerAnswer, newScore;
+
+			// Get input/timer data
+			playerAnswer = UICtrl.getPlayerAnswer();
+
+			// Add score, question number, and user answer to scoreController
+			newScore = scoreCtrl.logScore (
+				playerAnswer.timerWhenAnswered,
+				playerAnswer.questionNo,
+				playerAnswer.selectedAnswerNum
+			);
+	
+			// Add selected answer to the UI
+			UICtrl.highlightSelectedAnswer(playerAnswer);
+		};
+
+		return {
+			init: function() {
+				// Remove demo button and background, start game
+				demoBackground = document.querySelector(".demo-background");
+				demoBackground.parentNode.removeChild(demoBackground);
+				ctrlGameFlow();
+			}
+		}
+				
+	})(scoreController, UIController);
+		html = '<div class="demo-background"><button class="begin">Click to begin game</button></div>';
+		document.querySelector(".game-wrapper").insertAdjacentHTML('afterbegin', html);
+		document.querySelector(".begin").addEventListener('click', controller.init);
+</script>
+</html>

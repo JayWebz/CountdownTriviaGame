@@ -1,0 +1,575 @@
+@keyframes countdownSlide {
+	from { right: 0; }
+	to { right: 89.125%; }
+}
+
+@keyframes countdownSlide750 {
+	from { right: 0; }
+	to { right: 87%; }
+}
+
+@keyframes countdownSlide630 {
+	from { right: 0; }
+	to { right: 85.25%; }
+}
+
+@keyframes countdownSlide525 {
+	from { right: 0; }
+	to { right: 83%; }
+}
+
+@keyframes countdownSlide465 {
+	from { right: 0; }
+	to { right: 80.75%; }
+}
+
+@keyframes countdownSlide420 {
+	from { right: 0; }
+	to { right: 78%; }
+}
+
+@keyframes countdownSlide360 {
+	from { right: 0; }
+	to { right: 73%; }
+}
+
+@keyframes emptyingTimer {
+	from { margin-right: 0; }
+	to { margin-right: 91.25%; }
+}
+
+@keyframes emptyingTimer750 {
+	from { margin-right: 0; }
+	to { margin-right: 87.25%; }
+}
+
+@keyframes emptyingTimer630 {
+	from { margin-right: 0; }
+	to { margin-right: 84%; }
+}
+
+@keyframes fadeOut {
+	0% { opacity: 1; }
+	99% { opacity: 0; }
+	100% { opacity: 0; display: none; }
+}
+
+@keyframes fadeIn {
+	0% { opacity: 0; }
+	100% {opacity: 1; }
+}
+
+@keyframes questionIntro {
+	from { transform: scale(1.2) translateY(80px); }
+	to { transform: scale(1) translateY(0); }
+}
+
+@keyframes orbit {
+    from { transform: rotate(0deg) translateX(16px) rotate(0deg); }
+    to   { transform: rotate(360deg) translateX(16px) rotate(-360deg); }
+}
+
+@media only screen and (max-width: 800px) {
+	.game {
+		font-size: 80%!important;
+	}
+
+	.game .banner__question {
+		font-size: 16px;
+	}
+
+	.game .trivia__question {
+		font-size: 28px;
+	}
+}
+
+@media only screen and (max-width: 640px) {
+	.game {
+		font-size: 40%!important;
+	}
+}
+
+@media only screen and (max-width: 550px) {
+	.game .demo-background {
+		overflow: hidden;
+	}
+}
+
+@media only screen and (max-width: 400px) {
+	.game .trivia__question {
+		font-size: 22px;
+	}
+}
+
+body {
+	background-image: radial-gradient(at top right, #ED9D1F 33%, #FFD798);
+	width: 100%;
+	height: 100vh;
+	margin: 0;
+}
+
+.game {
+	position: relative;
+	width: 100%;
+	max-width: 800px;
+	max-height: 600px;
+	margin: 0 auto;
+}
+
+.begin {
+	border: 0;
+	background-color: #00a9e0;
+	height: 50px;
+	width: 260px;
+	color: #fff;
+	border-radius: 5px;
+	font-size: 20px;
+	font-weight: 700;
+	text-transform: uppercase;
+	margin-left: 50%;
+	margin-top: 50%;
+	transform: translate(-50%);
+	outline: 0;
+	transition: 0.3s;
+}
+
+.begin:hover, .restart:hover {
+	background-color: #005c7b;
+}
+
+.demo {
+	font-family: 'Calibri', sans-serif;
+	text-transform: uppercase;
+	font-weight: 700;
+	width: 37.5%;
+	text-align: center;
+	font-size: 42px;
+	margin: 25px auto 30px;
+	transform: translateX(-50%) translateY(-50%);
+	left: 50%;
+	top: 50%;
+	position: absolute;
+	z-index: 15;
+	color: #fff;
+}
+
+.demo-background {
+	width: calc(100% + 2px);
+	height: calc(100% + 2px);
+	position: absolute;
+	top: -2px;
+	left: -2px;
+	z-index: 1;
+}
+
+.game-wrapper {
+	height: 100%;
+	width: 100%;
+	margin: 0 auto;
+	padding: 10px 15px;
+	box-sizing: border-box;
+	position: absolute;
+	padding-bottom: 75%;
+}
+
+.banner {
+	height: 50px;
+	border-radius: 10px;
+	width: 100%;
+	background: linear-gradient(#515151 15%, #000 70%, #785800);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	box-sizing: border-box;
+	padding: 0 20px;
+	border-top: 1px solid #a9a9a9;
+	border-bottom: 1px solid #000;
+}
+
+.banner > * {
+	display: inline-block;
+}
+
+.banner__logo {
+	color: #fff;
+	font-family: Calibri, sans-serif;
+	font-weight: 700;
+	font-size: 15px;
+	border: 2px solid #fff;
+	border-radius: 50%;
+	position: relative;
+	height: 30px;
+	width: 30px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	float: left;
+}
+
+.banner__logo:after {
+	content: "";
+	height: 6px;
+	width: 6px;
+	background-color: #00a9e0;
+	border-radius: 50%;
+	position: absolute;
+	animation: orbit 6s linear infinite;
+}
+
+.banner__question {
+	font-size: 24px;
+	font-family: Calibri, sans-serif;
+	color: #fff;
+}
+
+@media only screen and (max-width: 500px) {
+	.banner__question {
+		font-size: 20px;
+	}
+}
+
+.trivia {
+	font-family: 'Calibri', sans-serif;
+	text-transform: uppercase;
+	font-weight: 700;
+	width: 100%;
+}
+
+.trivia__header {
+	height: 170px;
+}
+
+.trivia__question {
+	width: 85%;
+	text-align: center;
+	font-size: 32px;
+	margin: 25px auto 40px;
+	transform: scale(1.2) translateY(80px);
+	animation-name: questionIntro;
+	animation-duration: 1s;
+	animation-delay: 3s;
+	animation-timing-function: linear;
+	animation-fill-mode: forwards;
+}
+
+@media only screen and (max-width: 500px) {
+	.trivia__question {
+		font-size: 26px;
+	}
+}
+
+.trivia__clues {
+	font-size: 24px;
+	text-align: center;
+	line-height: 0.6;
+}
+
+.trivia__options {
+	margin-top: 30px;
+}
+
+.trivia__options-option {
+	padding: 2px 4px;
+}
+
+.trivia__options-option > * {
+	display: inline-block;
+}
+
+.trivia__options-option:not(:last-child) {
+	margin-bottom: 5px;
+}
+
+.trivia__options-option--highlighted {
+	background-color: rgba(255,255,255,0.6);
+	border-radius: 5px;
+}
+
+.trivia__options-option--correct {
+	margin-top: 10px;
+	font-family: Calibri, sans-serif;
+	font-weight: 700;
+	text-transform: uppercase;
+	opacity: 0;
+	background-color: rgba(255,255,255,0.6);
+	border-radius: 5px;
+	animation-name: fadeIn;
+	animation-duration: 1s;
+	animation-delay: 0.2s;
+	animation-timing-function: linear;
+	animation-fill-mode: forwards;
+}
+
+.trivia__options-number {
+	background-color: #000;
+	height: 35px;
+	width: 35px;
+	border-radius: 100%;
+	transform: skew(-10deg);
+	color: #fff;
+	padding: 5px;
+	position: relative;
+	pointer-events: none;
+}
+
+.trivia__options-number-text {
+	transform: skew(10deg);
+	display: block;
+	font-size: 30px;
+	text-align: center;
+	font-family: 'Russo One', sans-serif;
+}
+
+.trivia__options-answer {
+	font-size: 27px;
+	margin-left: 10px;
+	pointer-events: none;
+	display: inline;
+}
+
+.trivia__options-disable {
+	width: 100%;
+	height: 270px;
+	opacity: 0;
+	margin-top: -270px;
+	display: none;
+}
+
+.trivia__answer-header {
+	width: 100%;
+}
+
+.trivia__answer-text {
+	margin: 30px auto 10px;
+	font-family: 'Russo One', sans-serif;
+	font-size: 45px;
+	text-align: center;
+	display: block;
+}
+
+.trivia__funfact {
+	text-align: center;
+	margin-top: 40px;
+	font-family: Calibri, sans-serif;
+	font-weight: 700;
+	text-transform: uppercase;
+	opacity: 0;
+	font-size: 42px;
+	animation-name: fadeIn;
+	animation-duration: 1s;
+	animation-delay: 0.2s;
+	animation-timing-function: linear;
+	animation-fill-mode: forwards;
+}
+
+.timer {
+	height: 40px;
+	width: 100%;
+	border-radius: 40px;
+	background: linear-gradient(#a0a0a0, #090909 10%);
+	display: flex;
+	position: relative;
+	margin-top: 20px;
+}
+
+.timer__left {
+	background: linear-gradient(#fdfb40, #ffb501);
+	height: 30px;
+	width: calc(100% - 10px);
+	margin-left: 5px;
+	margin-top: 5px;
+	border-radius: 30px;
+	animation-name: emptyingTimer;
+	animation-duration: 15.5s;
+	animation-delay: 4s;
+	animation-timing-function: linear;
+	animation-fill-mode: forwards;
+}
+
+.timer__counter {
+	position: absolute;
+	z-index: 10;
+	right: 0;
+	top: -5px;
+	height: 50px;
+	background: linear-gradient(#515151 15%, #000 70%, #785800);
+	color: #fff;
+	font-size: 30px;
+	line-height: 50px;
+	padding: 0 15px;
+	border-radius: 50px;
+	animation-name: countdownSlide;
+	animation-duration: 15.55s;
+	animation-delay: 4s;
+	animation-timing-function: linear;
+	animation-fill-mode: forwards;
+}
+
+@media only screen and (max-width: 750px) {
+	.timer__left {
+		animation-name: emptyingTimer750;
+	}	
+
+	.timer__counter {
+		animation-name: countdownSlide750;
+	}
+}
+
+@media only screen and (max-width: 630px) {
+	.timer__counter {
+		animation-name: countdownSlide630;
+	}
+}
+
+@media only screen and (max-width: 525px) {
+	.timer__counter {
+		animation-name: countdownSlide525;
+	}
+}
+
+@media only screen and (max-width: 465px) {
+	.timer__counter {
+		animation-name: countdownSlide465;
+	}
+}
+
+@media only screen and (max-width: 420px) {
+	.timer__counter {
+		animation-name: countdownSlide420;
+	}
+}
+
+@media only screen and (max-width: 360px) {
+	.timer__counter {
+		animation-name: countdownSlide360;
+	}
+}
+
+.timer__counter:before {
+	content: '';
+	height: 22px;
+	width: 80%;
+	background: linear-gradient(#fcfcfc 15%, #3e4046 90%, #000 100%);
+	position: absolute;
+	border-radius: 22px;
+	z-index: 8;
+	top: 2px;
+	left: 9px;
+}
+
+.timer__counter-text {
+	z-index: 12;
+	position: relative;
+	font-family: 'Russo One', sans-serif;
+	display: block;
+	min-width: 63px;
+	text-align: center;
+}
+
+.fade-out-animation--block {
+	display: block;
+	opacity: 1;
+	animation-name: fadeOut;
+	animation-duration: 0.2s;
+	animation-delay: 1s;
+	animation-timing-function: linear;
+	animation-fill-mode: forwards;
+}
+
+.fade-out-animation--flex {
+	display: flex;
+	opacity: 1;
+	animation-name: fadeOut;
+	animation-duration: 0.2s;
+	animation-delay: 1s;
+	animation-timing-function: linear;
+	animation-fill-mode: forwards;
+}
+
+.fade-in-animation {
+	animation-name: fadeIn;
+	animation-duration: 1s;
+	animation-delay: 0.2s;
+	animation-timing-function: linear;
+	animation-fill-mode: forwards;
+	opacity: 0;
+}
+
+.leaderboard__title {
+	line-height: 38px;
+	font-weight: 700;
+	font-family: Calibri, sans-serif;
+	font-size: 30px;
+	display: inline-block;
+	float: right;
+	color: #fff;
+}
+
+.leaderboard__table {
+	width: calc(100% + 35px);
+	background-color: #333;
+	margin-left: -17.5px;
+	margin-top: 20px;
+	font-family: Calibri, sans-serif;
+	line-height:24px;
+}
+
+.leaderboard__table th {
+	color: #fff;
+	text-transform: uppercase;
+	text-align: left;
+	padding-left: 20px;
+	border-bottom: 2px solid #7F7E7E;
+}
+
+.leaderboard__table th:first-child {
+	width: 100px;
+}
+
+.leaderboard__table th:last-child {
+	width: 200px;
+}
+
+.leaderboard__table tr:first-child {
+	text-align: left;
+}
+
+.leaderboard__table tr:nth-child(2) td {
+	border-top: 2px solid #464646;
+}
+
+.leaderboard__table tr:not(:first-child) {
+	background: linear-gradient(#333, #000, #333);
+	color: #fff;
+	line-height: 70px;
+}
+
+.leaderboard__table td:first-child {
+	padding-left: 20px;
+	font-family: 'Russo One', sans-serif;
+	font-size: 50px;
+}
+
+.leaderboard__table td:not(:first-child) {
+	font-size: 26px;
+	line-height: 27px;
+	padding-left: 20px;
+	text-transform: uppercase;
+}
+
+.restart {
+	border: 0;
+	background-color: #00a9e0;
+	height: 50px;
+	width: 300px;
+	color: #fff;
+	border-radius: 5px;
+	font-size: 20px;
+	font-weight: 700;
+	text-transform: uppercase;
+	outline: 0;
+	transition: 0.3s;
+	margin-top: 100px;
+	margin-left: 50%;
+	transform: translateX(-50%);
+}
